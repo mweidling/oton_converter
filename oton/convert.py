@@ -1,5 +1,6 @@
 from os.path import exists, isfile
 import sys
+import tomli
 from .constants import *
 
 
@@ -381,14 +382,14 @@ class Converter:
     self.nf_lines.append(DSL2)
     self.nf_lines.append('')
 
-    # The defaul pipeline parameters
-    # Set _venv_path, _workspace_path, and _mets_path appropriately
-    venv_path = '\$HOME/venv37-ocrd/bin/activate'
-    params_venv = f'params.venv = {QM}{venv_path}{QM}'
-    workspace_path = '$projectDir/ocrd-workspace/'
-    params_workspace = f'params.workspace = {QM}{workspace_path}{QM}'
-    mets_path = '$projectDir/ocrd-workspace/mets.xml'
-    params_mets = f'params.mets = {QM}{mets_path}{QM}'
+    with open('config.toml', mode='rb') as fp:
+        config = tomli.load(fp)
+        venv_path = config['venv_path']
+        params_venv = f'params.venv = {QM}{venv_path}{QM}'
+        workspace_path = config['workspace_path']
+        params_workspace = f'params.workspace = {QM}{workspace_path}{QM}'
+        mets_path = config['mets_path']
+        params_mets = f'params.mets = {QM}{mets_path}{QM}'
 
     self.nf_lines.append(params_venv)
     self.nf_lines.append(params_workspace)

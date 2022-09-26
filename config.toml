@@ -1,0 +1,3 @@
+venv_path = "$PWD/venv/bin/activate"
+workspace_path = '$PWD/ocrd-workspace/'
+mets_path = '$PWD/ocrd-workspace/mets.xml'
