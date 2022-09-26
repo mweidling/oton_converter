@@ -1,4 +1,5 @@
 import click
+from .convert import Converter
 
 @click.group()
 def cli():
@@ -9,4 +10,7 @@ def cli():
 @click.option('-O', '--output', help='PATH to a NextFlow workflow file')
 @click.option('-D', '--docker', help='Set if a Docker image is used for OCR-D workflow')
 def convert(input, output, docker):
-    print("Hello World!")
+    converter = Converter()
+    print(f"OtoN> In: {input}")
+    print(f"OtoN> Out: {output}")
+    converter.convert_OtoN(input, output)

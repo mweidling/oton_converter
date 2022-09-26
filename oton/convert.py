@@ -2,7 +2,7 @@ from os.path import exists, isfile
 from string import ascii_letters, digits
 import sys
 import getopt
-import constants
+from .constants import *
 
 
 class Converter:
@@ -28,7 +28,7 @@ class Converter:
     print(f"INFO: TOKENS ON LINES END")
 
   # Rules:
-  # 1. Each constants.QM and constants.BACKSLASH is a separate token
+  # 1. Each QM and BACKSLASH is a separate token
   # 2. Each ocrd-process is a separate token
   # 3. Each -I, -O, and -P is a separate token
   def _ocrd_extract_tokens(self, filepath):
@@ -39,18 +39,18 @@ class Converter:
     with open(filepath, mode='r') as ocrd_file:
       for line in ocrd_file:
         curr_line_tokens = []
-        line = line.strip().split(constants.SPACE)
+        line = line.strip().split(SPACE)
         for token in line:
           if len(token) == 0: continue
           
           # Create separate tokens
           # for quotation marks
-          if token.startswith(constants.QM):
-            curr_line_tokens.append(constants.QM)
+          if token.startswith(QM):
+            curr_line_tokens.append(QM)
             curr_line_tokens.append(token[1:])
-          elif token.endswith(constants.QM):
+          elif token.endswith(QM):
             curr_line_tokens.append(token[:-1])
-            curr_line_tokens.append(constants.QM)
+            curr_line_tokens.append(QM)
           else:
             curr_line_tokens.append(token)
 
@@ -58,9 +58,9 @@ class Converter:
           self.ocrd_lines.append(curr_line_tokens)
 
   # Rules:
-  # 1. A single char token must be either: constants.QM or constants.BACKSLASH
+  # 1. A single char token must be either: QM or BACKSLASH
   # 2. A double char token must be either: -I, -O, or -P
-  # 3. Other tokens must contain only constants.VALID_CHARS
+  # 3. Other tokens must contain only VALID_CHARS
   def _ocrd_validate_token_symbols(self, lines):
     # Check for invalid symbols/tokens
     for line_index in range (0, len(lines)):
@@ -68,7 +68,7 @@ class Converter:
         token = lines[line_index][token_index]
         # Rule 1
         if len(token) == 1:
-          if token == constants.QM or token == constants.BACKSLASH:
+          if token == QM or token == BACKSLASH:
             continue
           else:
             print("Syntax error!")
@@ -88,7 +88,7 @@ class Converter:
               print("Hint: Remove invalid tokens.")
               sys.exit(2)
           else:
-            if token[0] not in constants.VALID_CHARS or token[1] not in constants.VALID_CHARS:
+            if token[0] not in VALID_CHARS or token[1] not in VALID_CHARS:
               print("Syntax error!")
               print(f"Invalid line {line_index+1}, invalid token: {token}")  
               print("Hint: Remove invalid tokens.")
@@ -96,7 +96,7 @@ class Converter:
         # Rule 3
         else:
           for char in token:
-            if char not in constants.VALID_CHARS:
+            if char not in VALID_CHARS:
               print("Syntax error!")
               print(f"Invalid line {line_index+1}, invalid token: {token}")  
               print("Hint: Remove invalid tokens.") 
@@ -110,8 +110,8 @@ class Converter:
   # and an output file. In other words,
   # a minimum amount of tokens.
   # 3. Each ocrd command starts 
-  # with a quotation mark (constants.QM)
-  # 4. After a constants.QM token on each line
+  # with a quotation mark (QM)
+  # 4. After a QM token on each line
   # a valid ocr-d process must follow
   # 5. After a '-I' token on each line
   # only one argument must follow
@@ -126,15 +126,15 @@ class Converter:
   # -P are not checked if they are supported 
   # or not by the specific OCR-D processors
   # 11. Each ocrd command ends
-  # with a quotation mark (constants.QM)
+  # with a quotation mark (QM)
   # 12. Each line except the last one ends 
-  # with a constants.BACKSLASH (constants.BACKSLASH).
-  # The last line ends with a constants.QM.
+  # with a BACKSLASH (BACKSLASH).
+  # The last line ends with a QM.
   # 13. Invalid chars inside tokens
   # invalidate the token
   def _ocrd_validate_token_syntax(self, lines):
     # Validate the first line syntax (Rule 1)
-    expected = ['ocrd', 'process', constants.BACKSLASH]
+    expected = ['ocrd', 'process', BACKSLASH]
     first_line = lines[0]
     if not first_line == expected:
       print("Syntax error!")
@@ -149,11 +149,11 @@ class Converter:
     for line_index in range (1, len(lines)):
       # Validate the start of an OCR-D line/command
       # (Rule 3)
-      if not lines[line_index][0] == constants.QM:
+      if not lines[line_index][0] == QM:
         print("Syntax error!")
         print(f"Invalid line: {line_index+1}, wrong token at {1}")
         print(f"Token: {lines[line_index][0]}")
-        print(f"Hint: Commands must start with a quotation mark ({constants.QM}).")
+        print(f"Hint: Commands must start with a quotation mark ({QM}).")
         sys.exit(2)
 
       # Validate the minimum amount of tokens needed 
@@ -166,14 +166,14 @@ class Converter:
           continue
         print("Syntax error!")
         print(f"Invalid line {line_index+1}, low amount of tokens!")
-        print(f"Hint: Each line must start with a {constants.QM} and end with a {constants.BACKSLASH}.")
+        print(f"Hint: Each line must start with a {QM} and end with a {BACKSLASH}.")
         print("Hint: Each line must have a processor call, an input file, and an output file.")
         sys.exit(2)
       
       # Validate the OCR-D processor call in the OCR-D command
       # (Rule 4)
       ocrd_processor = f"ocrd-{lines[line_index][1]}"
-      if ocrd_processor not in constants.OCRD_PROCESSORS:
+      if ocrd_processor not in OCRD_PROCESSORS:
         print("Syntax error!")
         print(f"Ivalid line: {line_index+1}, invalid token: {lines[line_index][1]}")
         print("Hint: ocrd-process is spelled incorrectly or does not exists.")
@@ -196,9 +196,9 @@ class Converter:
           input_found = True
           # Validate the -I token
           # Exactly one token comes after the -I
-          # The token must not be a constants.QM or a constants.BACKSLASH
+          # The token must not be a QM or a BACKSLASH
           token_next = lines[line_index][token_index+1]
-          if token_next == constants.QM or token_next == constants.BACKSLASH or \
+          if token_next == QM or token_next == BACKSLASH or \
             token_next == '-O' or token_next == '-P':
             print("Syntax Error!")
             print(F"Invalid line: {line_index+1}, wrong or missing input token for: {token_index}")
@@ -219,7 +219,7 @@ class Converter:
           # Exactly one token comes after the -O
           # The token must not be a '"' or '\'
           token_next = lines[line_index][token_index+1]
-          if token_next == constants.QM or token_next == constants.BACKSLASH or \
+          if token_next == QM or token_next == BACKSLASH or \
             token_next == '-I' or token_next == '-P':
             print("Syntax Error!")
             print(F"Invalid line: {line_index+1}, wrong or missing output token for: {token_index}")
@@ -233,7 +233,7 @@ class Converter:
           # Exactly two tokens comes after the -P
           # The tokens must not be a '"' or '\'
           token_next1 = lines[line_index][token_index+1]
-          if token_next1 == constants.QM or token_next1 == constants.BACKSLASH or \
+          if token_next1 == QM or token_next1 == BACKSLASH or \
             token_next1 == '-I' or token_next1 == '-O':
             print("Syntax Error!")
             print(F"Invalid line: {line_index+1}, wrong or missing parameter token at: {token_index+1}")
@@ -242,7 +242,7 @@ class Converter:
             processed_tokens.append(token_next1)
 
           token_next2 = lines[line_index][token_index+2]
-          if token_next2 == constants.QM or token_next2 == constants.BACKSLASH or \
+          if token_next2 == QM or token_next2 == BACKSLASH or \
             token_next2 == '-I' or token_next2 == '-O':
             print("Syntax Error!")
             print(F"Invalid line: {line_index+1}, wrong or missing parameter token at: {token_index+2}")
@@ -252,7 +252,7 @@ class Converter:
           # print(f"ParameterToken: {token}, {token_next1}, {token_next2}")
 
         else:
-          if token == constants.QM or token == constants.BACKSLASH:
+          if token == QM or token == BACKSLASH:
             continue 
           if token in processed_tokens:
             continue
@@ -262,12 +262,12 @@ class Converter:
             print(f"Token: {token}")
             print(f"Hint: Exactly one token must follow -I or -O.")
             print(f"Hint: Exactly two tokens must follow -P.")
-            print("Tokens following -I, -O, and -P cannot be a quotation mark or a constants.BACKSLASH.")
+            print("Tokens following -I, -O, and -P cannot be a quotation mark or a BACKSLASH.")
             sys.exit(2)
 
       # Validate the end of an OCR-D command (Rule 11)
-      if not lines[line_index][-2] == constants.QM:
-        # the last line has no constants.QM in position -2
+      if not lines[line_index][-2] == QM:
+        # the last line has no QM in position -2
         if line_index == len(lines)-1:
           continue
         print("Syntax error!")
@@ -277,7 +277,7 @@ class Converter:
         sys.exit(2)
 
       # Validate the end of a OCR-D line (Rule 12)
-      if not lines[line_index][-1] == constants.BACKSLASH:
+      if not lines[line_index][-1] == BACKSLASH:
         # the last line has no '\\' in position -1
         if line_index == len(lines)-1:
           print(f"Line_index: {line_index}")
@@ -344,7 +344,7 @@ class Converter:
 
       for token_index in range(1, len(self.ocrd_lines[line_index])):
         curr_token = self.ocrd_lines[line_index][token_index]
-        if curr_token == constants.QM:
+        if curr_token == QM:
           last_QM_index = token_index
           break
 
@@ -380,17 +380,17 @@ class Converter:
     self.nf_lines = []
 
     # Rule 1
-    self.nf_lines.append(constants.DSL2)
+    self.nf_lines.append(DSL2)
     self.nf_lines.append('')
 
     # The defaul pipeline parameters
     # Set _venv_path, _workspace_path, and _mets_path appropriately
     venv_path = '\$HOME/venv37-ocrd/bin/activate'
-    params_venv = f'params.venv = {constants.QM}{venv_path}{constants.QM}'
+    params_venv = f'params.venv = {QM}{venv_path}{QM}'
     workspace_path = '$projectDir/ocrd-workspace/'
-    params_workspace = f'params.workspace = {constants.QM}{workspace_path}{constants.QM}'
+    params_workspace = f'params.workspace = {QM}{workspace_path}{QM}'
     mets_path = '$projectDir/ocrd-workspace/mets.xml'
-    params_mets = f'params.mets = {constants.QM}{mets_path}{constants.QM}'
+    params_mets = f'params.mets = {QM}{mets_path}{QM}'
 
     self.nf_lines.append(params_venv)
     self.nf_lines.append(params_workspace)
@@ -409,80 +409,53 @@ class Converter:
       # Find the input/output parameters of the ocrd command
       in_index = oc.index('-I')+1
       out_index = oc.index('-O')+1
-      oc_in = f'{constants.QM}{oc[in_index]}{constants.QM}'
-      oc_out = f'{constants.QM}{oc[out_index]}{constants.QM}'
+      oc_in = f'{QM}{oc[in_index]}{QM}'
+      oc_out = f'{QM}{oc[out_index]}{QM}'
 
       # Replace the input/output parameters with their placeholders
-      oc[in_index] = constants.IN_DIR_PH
-      oc[out_index] = constants.OUT_DIR_PH
+      oc[in_index] = IN_DIR_PH
+      oc[out_index] = OUT_DIR_PH
       # The bash string of the ocrd command
       oc_bash_str = ' '.join(oc)
 
       # Start building the current NF process
-      self.nf_lines.append(f"process {nf_process_name} {constants.BRACKETS[0]}")
-      self.nf_lines.append(f"{constants.TAB}maxForks 1")
+      self.nf_lines.append(f"process {nf_process_name} {BRACKETS[0]}")
+      self.nf_lines.append(f"{TAB}maxForks 1")
       self.nf_lines.append('')
-      self.nf_lines.append(f'{constants.TAB}input:')
-      self.nf_lines.append(f'{constants.TAB}{constants.TAB}path mets_file')
-      self.nf_lines.append(f'{constants.TAB}{constants.TAB}val {constants.IN_DIR}')
-      self.nf_lines.append(f'{constants.TAB}{constants.TAB}val {constants.OUT_DIR}')
+      self.nf_lines.append(f'{TAB}input:')
+      self.nf_lines.append(f'{TAB}{TAB}path mets_file')
+      self.nf_lines.append(f'{TAB}{TAB}val {IN_DIR}')
+      self.nf_lines.append(f'{TAB}{TAB}val {OUT_DIR}')
       self.nf_lines.append('')
-      self.nf_lines.append(f'{constants.TAB}output:')
-      self.nf_lines.append(f'{constants.TAB}{constants.TAB}val {constants.OUT_DIR}')
+      self.nf_lines.append(f'{TAB}output:')
+      self.nf_lines.append(f'{TAB}{TAB}val {OUT_DIR}')
       self.nf_lines.append('')
-      self.nf_lines.append(f'{constants.TAB}script:')
-      self.nf_lines.append(f'{constants.TAB}"""')
-      self.nf_lines.append(f'{constants.TAB}source "${constants.BRACKETS[0]}params.venv{constants.BRACKETS[1]}"')
-      self.nf_lines.append(f'{constants.TAB}{oc_bash_str}')
-      self.nf_lines.append(f'{constants.TAB}deactivate')
-      self.nf_lines.append(f'{constants.TAB}"""')
-      self.nf_lines.append(constants.BRACKETS[1])
+      self.nf_lines.append(f'{TAB}script:')
+      self.nf_lines.append(f'{TAB}"""')
+      self.nf_lines.append(f'{TAB}source "${BRACKETS[0]}params.venv{BRACKETS[1]}"')
+      self.nf_lines.append(f'{TAB}{oc_bash_str}')
+      self.nf_lines.append(f'{TAB}deactivate')
+      self.nf_lines.append(f'{TAB}"""')
+      self.nf_lines.append(BRACKETS[1])
       self.nf_lines.append('')
       # This list is used inside the workflow section in Rule 3
       nf_processes.append([nf_process_name, oc_in, oc_out])
 
     # Create the main workflow
     # Rule 3
-    self.nf_lines.append(f'workflow {constants.BRACKETS[0]}')
-    self.nf_lines.append(f'{constants.TAB}main:')
+    self.nf_lines.append(f'workflow {BRACKETS[0]}')
+    self.nf_lines.append(f'{TAB}main:')
     previous_nfp = None
     for nfp in nf_processes:
       if previous_nfp == None:
-        self.nf_lines.append(f'{constants.TAB}{constants.TAB}{nfp[0]}(params.mets, {nfp[1]}, {nfp[2]})')
+        self.nf_lines.append(f'{TAB}{TAB}{nfp[0]}(params.mets, {nfp[1]}, {nfp[2]})')
       else:
-        self.nf_lines.append(f'{constants.TAB}{constants.TAB}{nfp[0]}(params.mets, {previous_nfp}.out, {nfp[2]})')
+        self.nf_lines.append(f'{TAB}{TAB}{nfp[0]}(params.mets, {previous_nfp}.out, {nfp[2]})')
       previous_nfp = nfp[0]
-    self.nf_lines.append(f'{constants.BRACKETS[1]}')
+    self.nf_lines.append(f'{BRACKETS[1]}')
 
     # self._print_nextflow_tokens()
     # Write Nextflow line tokens to an output file
     with open(output_path, mode='w') as nextflow_file:
       for token_line in self.nf_lines:
         nextflow_file.write(f'{token_line}\n')
-
-def main(argv):
-  input_path = ''
-  output_path = ''
-
-  try:
-    opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
-  except getopt.GetoptError:
-    print("python3 converter.py -i <input_path> -o <output_path>")
-    sys.exit(2)
-
-  for opt, arg in opts:
-    if opt == '-h':
-      print("python3 converter.py -i <input_path> -o <output_path>")
-      sys.exit()
-    elif opt in ("-i", "--ifile"):
-      input_path = arg
-    elif opt in ("-o", "--ofile"):
-      output_path = arg
-
-  converter = Converter()
-  print(f"OtoN> In: {input_path}")
-  print(f"OtoN> Out: {output_path}")
-  converter.convert_OtoN(input_path, output_path)
-
-if __name__ == "__main__":
-   main(sys.argv[1:])
