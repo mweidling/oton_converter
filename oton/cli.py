@@ -1,5 +1,6 @@
 import click
 from .convert import Converter
+from .validate import validate_ocrd_file
 
 @click.group()
 def cli():
@@ -14,3 +15,8 @@ def convert(input, output, docker):
     print(f"OtoN> In: {input}")
     print(f"OtoN> Out: {output}")
     converter.convert_OtoN(input, output)
+
+@cli.command("validate", help="Validate OCR-D workflow file")
+@click.option('-I', '--input', help='PATH to a OCR-D workflow file in TXT format')
+def validate(input):
+    validate_ocrd_file(input)
