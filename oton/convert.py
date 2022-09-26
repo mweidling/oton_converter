@@ -1,7 +1,5 @@
 from os.path import exists, isfile
-from string import ascii_letters, digits
 import sys
-import getopt
 from .constants import *
 
 
