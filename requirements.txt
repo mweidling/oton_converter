@@ -2,4 +2,4 @@ click>=8.0.0
 wheel
 asset>=0.6.13
 setuptools>=65.5.1
-ocrd_validators>=2.49.0
+ocrd>=2.67.0
